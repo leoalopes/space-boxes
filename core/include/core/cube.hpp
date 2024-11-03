@@ -18,8 +18,8 @@ class Cube : public Object {
 
     void draw() override;
 
-    CubeBuffer getBuffer() { return this->buffer; }
-
     void setViewMatrix(glm::mat4 matrix) override;
     void setProjectionMatrix(glm::mat4 matrix) override;
+
+    ObjectBuffer *getBuffer() override { return &this->buffer; }
 };

@@ -5,14 +5,15 @@
 
 const glm::vec3 DEFAULT_ORIGIN = glm::vec3(0.0f, 0.0f, 0.0f);
 
-template <typename Vertex> class ObjectBuffer {
+class ObjectBuffer {
   protected:
     unsigned int objectId;
     unsigned int bufferId;
     glm::vec3 modelOrigin;
 
   public:
-    ObjectBuffer(Vertex *vertices, long size, GLenum usage = GL_STATIC_DRAW,
+    ObjectBuffer(const float *vertices, long size,
+                 GLenum usage = GL_STATIC_DRAW,
                  glm::vec3 modelOrigin = DEFAULT_ORIGIN)
         : modelOrigin(modelOrigin) {
         glGenVertexArrays(1, &this->objectId);

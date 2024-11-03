@@ -1,4 +1,5 @@
 #pragma once
+#include "core/object_buffer.hpp"
 #include "core/scene.hpp"
 #include "core/transform.hpp"
 
@@ -25,4 +26,6 @@ class Object {
 
     Scene *getScene() const { return this->scene; }
     void setScene(Scene *scene) { this->scene = scene; }
+
+    virtual ObjectBuffer *getBuffer() = 0;
 };

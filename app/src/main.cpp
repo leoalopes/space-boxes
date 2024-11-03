@@ -1,7 +1,6 @@
 #include <glad/glad.h>
 
 #include "core/camera.hpp"
-#include "core/cube.hpp"
 #include "core/cube_buffer.hpp"
 #include "core/scene.hpp"
 #include "core/shader.hpp"
@@ -75,29 +74,33 @@ int main() {
 
     Shader cubeShader("assets/shaders/cube.vert", "assets/shaders/cube.frag");
     Texture cubeTexture("assets/textures/floor.jpg", GL_RGB);
-    Player cube(buffer, cubeShader, {cubeTexture});
-    cube.addCollider(glm::vec3(1.0f, 1.0f, 1.0f));
-    Transform *cubeTransform = cube.getTransform();
-    glm::vec2 cameraOffset(-6.0f, -5.0f);
+    Player player(buffer, cubeShader, {cubeTexture});
 
     Shader floorShader("assets/shaders/floor.vert",
                        "assets/shaders/floor.frag");
     Texture floorTexture("assets/textures/floor.png", GL_RGB);
-    Cube floor(buffer, floorShader, {floorTexture});
+    CollisionAwareCube floor(buffer, floorShader, {floorTexture});
     Transform *floorTransform = floor.getTransform();
     floorTransform->setLocation(glm::vec3(0.0f, -1.0f, 0.0f));
     floorTransform->setScale(glm::vec3(20.0f, 0.5f, 20.0f));
 
+    CollisionAwareCube wall(buffer, floorShader, {floorTexture});
+    Transform *wallTransform = wall.getTransform();
+    wallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    wallTransform->setLocation(glm::vec3(0.0f, 1.25f, -10.25f));
+    wallTransform->setScale(glm::vec3(20.0f, 0.5f, 5.0f));
+
     Texture enemyTexture("assets/textures/enemy.jpg", GL_RGB);
-    Cube enemy(buffer, cubeShader, {enemyTexture});
+    CollisionAwareCube enemy(buffer, cubeShader, {enemyTexture});
     Transform *enemyTransform = enemy.getTransform();
     enemyTransform->setLocation(glm::vec3(4.0f, 0.0f, -6.0f));
 
     Camera camera;
 
     Scene scene;
-    scene.addObject(&cube);
+    scene.addObject(&player);
     scene.addObject(&floor);
+    scene.addObject(&wall);
     scene.addObject(&enemy);
     scene.setCamera(&camera);
     scene.setWindow(window);

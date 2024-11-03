@@ -5,7 +5,7 @@
 #include <array>
 #include <glm/glm.hpp>
 
-class CubeBuffer : public ObjectBuffer<const float> {
+class CubeBuffer : public ObjectBuffer {
     static inline constexpr std::array<float, 180> vertices = {
         // Back face
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
@@ -58,9 +58,9 @@ class CubeBuffer : public ObjectBuffer<const float> {
 
   public:
     CubeBuffer()
-        : ObjectBuffer<const float>(
-              this->vertices.data(), this->vertices.size() * sizeof(float),
-              GL_STATIC_DRAW, glm::vec3(-0.5f, -0.5f, -0.5f)) {
+        : ObjectBuffer(this->vertices.data(),
+                       this->vertices.size() * sizeof(float), GL_STATIC_DRAW,
+                       glm::vec3(-0.5f, -0.5f, -0.5f)) {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                               (void *)0);
         glEnableVertexAttribArray(0);

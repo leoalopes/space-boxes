@@ -1,21 +1,18 @@
-#include "core/collider.hpp"
-#include <core/cube.hpp>
+#pragma once
 
+#include "core/collider.hpp"
+#include "core/collision_aware_cube.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
 
-class Player : public Cube {
+class Player : public CollisionAwareCube {
   private:
     constexpr static const glm::vec2 cameraOffset = glm::vec2(6.0f, 4.0f);
     std::unique_ptr<Collider> collider;
 
   public:
-    using Cube::Cube;
-
-    void addCollider(glm::vec3 dimensions) {
-        this->collider = std::make_unique<Collider>(this, dimensions);
-    }
+    using CollisionAwareCube::CollisionAwareCube;
 
     void update() override {
         if (this->scene == nullptr) {
@@ -81,14 +78,5 @@ class Player : public Cube {
 
         camera->setLocation(newCameraLocation);
         camera->setForwardVector(location - newCameraLocation);
-    }
-
-    void draw() override {
-        Cube::draw();
-
-        if (this->collider) {
-            this->collider->debug(this->projection, this->view,
-                                  this->transform.getMatrix());
-        }
     }
 };
