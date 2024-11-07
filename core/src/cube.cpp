@@ -6,15 +6,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Cube::Cube(CubeBuffer buffer, Shader shader, std::vector<Texture> textures)
-    : shader(shader), textures(textures) {
+Cube::Cube(std::string name, std::string type, CubeBuffer buffer, Shader shader,
+           std::vector<Texture> textures)
+    : Object(name, type), shader(shader), textures(textures) {
     this->shader.use();
     for (int tex = 0; tex < this->textures.size(); tex++) {
         shader.setInt("texture" + std::to_string(tex + 1), tex);
     }
 }
 
-void Cube::draw() {
+void Cube::draw(bool isColliding) {
     for (int tex = 0; tex < this->textures.size(); tex++) {
         glActiveTexture(GL_TEXTURE0 + tex);
         this->textures.at(tex).use();

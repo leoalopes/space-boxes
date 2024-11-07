@@ -7,7 +7,7 @@
 class DebugBuffer : public ObjectBuffer {
   public:
     DebugBuffer(const float *vertices, long size, glm::vec3 origin)
-        : ObjectBuffer(vertices, size, GL_STATIC_DRAW, origin) {
+        : ObjectBuffer(vertices, size, GL_DYNAMIC_DRAW, origin) {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                               (void *)0);
         glEnableVertexAttribArray(0);
@@ -19,5 +19,9 @@ class DebugBuffer : public ObjectBuffer {
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    void update(const float *vertices, long size) {
+        ObjectBuffer::updateBuffer(vertices, size, GL_DYNAMIC_DRAW);
     }
 };

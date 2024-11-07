@@ -3,6 +3,8 @@
 #include "core/camera.hpp"
 #include "core/object.hpp"
 #include <GLFW/glfw3.h>
+#include <map>
+#include <string>
 #include <vector>
 
 class Object;
@@ -19,11 +21,14 @@ class Scene {
     glm::vec2 mouseDelta;
     glm::mat4 matrix;
 
+    /*bool detectionCollision(Object *root, Object *target);*/
+    std::map<std::string, std::vector<Object *>> detectCollisions();
+
   public:
     Scene(unsigned int width = DEFAULT_SCREEN_WIDTH,
           unsigned int height = DEFAULT_SCREEN_HEIGHT);
 
-    std::vector<Object *> getObjects() const { return this->getObjects(); }
+    std::vector<Object *> getObjects() const { return this->objects; }
     void addObject(Object *object);
 
     Camera *getCamera() const { return this->camera; }

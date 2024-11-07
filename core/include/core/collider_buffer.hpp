@@ -4,9 +4,11 @@
 #include "core/debug_buffer.hpp"
 #include "glm/fwd.hpp"
 #include <array>
+#include <limits>
 #include <memory>
 
 class ColliderBuffer {
+    std::array<float, 108> original;
     std::array<float, 108> vertices;
     std::unique_ptr<DebugBuffer> buffer;
 
@@ -166,6 +168,8 @@ class ColliderBuffer {
         vertices.at(105) = origin.x;
         vertices.at(106) = origin.y + dimensions.y;
         vertices.at(107) = origin.z;
+
+        this->original = vertices;
     }
 
   public:
@@ -174,6 +178,39 @@ class ColliderBuffer {
         this->buffer = std::make_unique<DebugBuffer>(
             this->vertices.data(), this->vertices.size() * sizeof(float),
             origin);
+    }
+
+    void update(glm::mat4 transform) {
+        this->vertices = original;
+        for (int i = 0; i < 108; i += 3) {
+            glm::vec3 position{
+                vertices.at(i),
+                vertices.at(i + 1),
+                vertices.at(i + 2),
+            };
+            position = transform * glm::vec4(position, 1.0f);
+
+            vertices.at(i) = position.x;
+            vertices.at(i + 1) = position.y;
+            vertices.at(i + 2) = position.z;
+        }
+
+        this->buffer->update(vertices.data(),
+                             this->vertices.size() * sizeof(float));
+    }
+
+    std::array<glm::vec3, 2> getBoundingBox() {
+        glm::vec3 beginning{std::numeric_limits<float>::max()};
+        glm::vec3 end{std::numeric_limits<float>::lowest()};
+
+        for (int i = 0; i < 108; i += 3) {
+            glm::vec3 point{vertices[i], vertices[i + 1], vertices[i + 2]};
+
+            beginning = glm::min(beginning, point);
+            end = glm::max(end, point);
+        }
+
+        return {beginning, end};
     }
 
     void draw() {

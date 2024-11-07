@@ -2,20 +2,30 @@
 #include "core/object_buffer.hpp"
 #include "core/scene.hpp"
 #include "core/transform.hpp"
+#include "core/uuid.hpp"
 
 class Scene;
 
 class Object {
   protected:
-    unsigned int objectId;
+    std::string uuid;
+    std::string name;
+    std::string type;
     Transform transform;
     Scene *scene;
     glm::mat4 projection;
     glm::mat4 view;
 
   public:
-    virtual void update() {}
-    virtual void draw() = 0;
+    virtual void update(std::vector<Object *> collisions) {}
+    virtual void draw(bool isColliding) = 0;
+
+    Object(std::string name, std::string type)
+        : name(name), type(type), uuid(UUID::v4()) {}
+
+    std::string getUUID() const { return this->uuid; }
+    std::string getName() const { return this->name; }
+    std::string getType() const { return this->type; }
 
     Transform *getTransform() { return &this->transform; }
 
@@ -28,4 +38,6 @@ class Object {
     void setScene(Scene *scene) { this->scene = scene; }
 
     virtual ObjectBuffer *getBuffer() = 0;
+
+    virtual bool isCollisionAware() { return false; }
 };

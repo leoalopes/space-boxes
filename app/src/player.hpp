@@ -4,17 +4,31 @@
 #include "core/collision_aware_cube.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <memory>
+#include <vector>
 
-class Player : public CollisionAwareCube {
+class Player : public Cube, public CollisionAware {
   private:
     constexpr static const glm::vec2 cameraOffset = glm::vec2(6.0f, 4.0f);
-    std::unique_ptr<Collider> collider;
 
   public:
-    using CollisionAwareCube::CollisionAwareCube;
+    Player(CubeBuffer buffer, Shader shader, std::vector<Texture> textures)
+        : Cube("player", "player", buffer, shader, textures), CollisionAware() {
+        std::cout << "Initializing player collider, this=" << this << std::endl;
+        this->initializeCollider(this, glm::vec3(-0.5f, -0.5f, -0.5f),
+                                 glm::vec3(1.0f, 1.0f, 1.0f));
+        std::cout << "Player collider initialized" << std::endl;
+    }
 
-    void update() override {
+    void draw(bool isColliding) override {
+        Cube::draw(isColliding);
+
+        this->collider->debug(this->projection, this->view,
+                              isColliding ? 1 : 0);
+    }
+
+    bool isCollisionAware() override { return true; }
+
+    void update(std::vector<Object *> collisions) override {
         if (this->scene == nullptr) {
             return;
         }
@@ -78,5 +92,9 @@ class Player : public CollisionAwareCube {
 
         camera->setLocation(newCameraLocation);
         camera->setForwardVector(location - newCameraLocation);
+
+        std::array<glm::vec3, 2> bb = this->getCollider()->getBoundingBox();
+        glm::vec3 beginning = bb[0];
+        glm::vec3 end = bb[1];
     }
 };

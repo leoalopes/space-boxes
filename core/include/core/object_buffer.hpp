@@ -11,6 +11,13 @@ class ObjectBuffer {
     unsigned int bufferId;
     glm::vec3 modelOrigin;
 
+    void updateBuffer(const float *vertices, long size,
+                      GLenum usage = GL_STATIC_DRAW) {
+        glBindVertexArray(this->objectId);
+        glBindBuffer(GL_ARRAY_BUFFER, this->bufferId);
+        glBufferData(GL_ARRAY_BUFFER, size, vertices, usage);
+    }
+
   public:
     ObjectBuffer(const float *vertices, long size,
                  GLenum usage = GL_STATIC_DRAW,

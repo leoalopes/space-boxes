@@ -79,19 +79,42 @@ int main() {
     Shader floorShader("assets/shaders/floor.vert",
                        "assets/shaders/floor.frag");
     Texture floorTexture("assets/textures/floor.png", GL_RGB);
-    CollisionAwareCube floor(buffer, floorShader, {floorTexture});
+    Cube floor("floor", "floor", buffer, floorShader, {floorTexture});
     Transform *floorTransform = floor.getTransform();
     floorTransform->setLocation(glm::vec3(0.0f, -1.0f, 0.0f));
-    floorTransform->setScale(glm::vec3(20.0f, 0.5f, 20.0f));
+    floorTransform->setScale(glm::vec3(50.0f, 0.5f, 50.0f));
 
-    CollisionAwareCube wall(buffer, floorShader, {floorTexture});
-    Transform *wallTransform = wall.getTransform();
-    wallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
-    wallTransform->setLocation(glm::vec3(0.0f, 1.25f, -10.25f));
-    wallTransform->setScale(glm::vec3(20.0f, 0.5f, 5.0f));
+    CollisionAwareCube backWall("backWall", "wall", buffer, floorShader,
+                                {floorTexture});
+    Transform *backWallTransform = backWall.getTransform();
+    backWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    backWallTransform->setLocation(glm::vec3(0.0f, 1.25f, -25.25f));
+    backWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+
+    CollisionAwareCube leftWall("leftWall", "wall", buffer, floorShader,
+                                {floorTexture});
+    Transform *leftWallTransform = leftWall.getTransform();
+    leftWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
+    leftWallTransform->setLocation(glm::vec3(25.25f, 1.25f, 0.0f));
+    leftWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+
+    CollisionAwareCube rightWall("rightWall", "wall", buffer, floorShader,
+                                 {floorTexture});
+    Transform *rightWallTransform = rightWall.getTransform();
+    rightWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
+    rightWallTransform->setLocation(glm::vec3(-25.25f, 1.25f, 0.0f));
+    rightWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+
+    CollisionAwareCube frontWall("frontWall", "wall", buffer, floorShader,
+                                 {floorTexture});
+    Transform *frontWallTransform = frontWall.getTransform();
+    frontWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    frontWallTransform->setLocation(glm::vec3(0.0f, 1.25f, 25.25f));
+    frontWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
 
     Texture enemyTexture("assets/textures/enemy.jpg", GL_RGB);
-    CollisionAwareCube enemy(buffer, cubeShader, {enemyTexture});
+    CollisionAwareCube enemy("enemy", "enemy", buffer, cubeShader,
+                             {enemyTexture});
     Transform *enemyTransform = enemy.getTransform();
     enemyTransform->setLocation(glm::vec3(4.0f, 0.0f, -6.0f));
 
@@ -100,7 +123,10 @@ int main() {
     Scene scene;
     scene.addObject(&player);
     scene.addObject(&floor);
-    scene.addObject(&wall);
+    scene.addObject(&backWall);
+    scene.addObject(&leftWall);
+    scene.addObject(&rightWall);
+    scene.addObject(&frontWall);
     scene.addObject(&enemy);
     scene.setCamera(&camera);
     scene.setWindow(window);
@@ -121,6 +147,13 @@ int main() {
         float mouseDeltaY = newMouseY - mouseY;
         mouseX = newMouseX;
         mouseY = newMouseY;
+
+        enemy.getCollider()->updateBoundingBox();
+        player.getCollider()->updateBoundingBox();
+        frontWall.getCollider()->updateBoundingBox();
+        backWall.getCollider()->updateBoundingBox();
+        leftWall.getCollider()->updateBoundingBox();
+        rightWall.getCollider()->updateBoundingBox();
 
         scene.setMouseDelta(glm::vec2(mouseDeltaX, mouseDeltaY));
         scene.setDeltaTime(deltaTime);

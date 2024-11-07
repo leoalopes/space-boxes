@@ -8,9 +8,16 @@ class CollisionAware {
     std::unique_ptr<Collider> collider;
 
   public:
-    CollisionAware(Object *parent, glm::vec3 origin, glm::vec3 dimensions) {
-        this->collider = std::make_unique<Collider>(parent, origin, dimensions);
+    CollisionAware() = default;
+
+    void initializeCollider(Object *parent, glm::vec3 origin,
+                            glm::vec3 dimensions,
+                            std::vector<std::string> collideWith = {}) {
+        std::cout << "Creating collision aware with parent=" << parent
+                  << std::endl;
+        this->collider =
+            std::make_unique<Collider>(parent, origin, dimensions, collideWith);
     }
 
-    Collider *getCollider() { return this->collider.get(); }
+    virtual Collider *getCollider() { return this->collider.get(); }
 };

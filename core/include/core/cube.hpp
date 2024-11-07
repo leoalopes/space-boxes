@@ -14,9 +14,10 @@ class Cube : public Object {
     CubeBuffer buffer;
 
   public:
-    Cube(CubeBuffer buffer, Shader shader, std::vector<Texture> textures);
+    Cube(std::string name, std::string type, CubeBuffer buffer, Shader shader,
+         std::vector<Texture> textures);
 
-    void draw() override;
+    void draw(bool isColliding) override;
 
     void setViewMatrix(glm::mat4 matrix) override;
     void setProjectionMatrix(glm::mat4 matrix) override;
