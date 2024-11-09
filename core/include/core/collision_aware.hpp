@@ -13,8 +13,6 @@ class CollisionAware {
     void initializeCollider(Object *parent, glm::vec3 origin,
                             glm::vec3 dimensions,
                             std::vector<std::string> collideWith = {}) {
-        std::cout << "Creating collision aware with parent=" << parent
-                  << std::endl;
         this->collider =
             std::make_unique<Collider>(parent, origin, dimensions, collideWith);
     }

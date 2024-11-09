@@ -2,6 +2,7 @@
 #include "core/collider_buffer.hpp"
 #include "core/object.hpp"
 #include "core/shader.hpp"
+#include "glm/ext/quaternion_geometric.hpp"
 #include "glm/fwd.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include <algorithm>
@@ -25,7 +26,6 @@ class Collider {
           debugShader("assets/shaders/debug.vert", "assets/shaders/debug.frag"),
           boundingBox({glm::vec3{0.0f}, glm::vec3{0.0f}}),
           collideWith(collideWith) {
-        std::cout << "Creating collider with parent=" << parent << std::endl;
         this->parent = parent;
         this->buffer = std::make_unique<ColliderBuffer>(origin, dimensions);
         this->updateBoundingBox();
@@ -57,7 +57,7 @@ class Collider {
     glm::vec3 getOrigin() const { return this->origin; }
     glm::vec3 getDimensions() const { return this->dimensions; }
 
-    bool isColliding(Collider *targetCollider) {
+    bool checkCollision(Collider *targetCollider, glm::vec3 *direction) {
         if (this->getParent() == nullptr ||
             targetCollider->getParent() == nullptr) {
             return false;
@@ -97,10 +97,28 @@ class Collider {
         bool zAxis =
             rootBB[1].z >= targetBB[0].z && targetBB[1].z >= rootBB[0].z;
 
-        std::cout << "Collision: "
-                  << ((xAxis && yAxis && zAxis) ? "true" : "false") << '\n';
+        bool isColliding = xAxis && yAxis && zAxis;
+        if (isColliding) {
+            glm::vec3 rootPosition{(rootBB.at(1).x + rootBB.at(0).x) / 2,
+                                   (rootBB.at(1).y + rootBB.at(0).y) / 2,
+                                   (rootBB.at(1).z + rootBB.at(0).z) / 2};
+            glm::vec3 targetPosition{(targetBB.at(1).x + targetBB.at(0).x) / 2,
+                                     (targetBB.at(1).y + targetBB.at(0).y) / 2,
+                                     (targetBB.at(1).z + targetBB.at(0).z) / 2};
 
-        return xAxis && yAxis && zAxis;
+            glm::vec3 targetHalfSize{(targetBB.at(1).x - targetBB.at(0).x) / 2,
+                                     (targetBB.at(1).y - targetBB.at(0).y) / 2,
+                                     (targetBB.at(1).z - targetBB.at(0).z) / 2};
+
+            glm::vec3 difference = rootPosition - targetPosition;
+            glm::vec3 targetClosest =
+                targetPosition +
+                glm::clamp(difference, -targetHalfSize, targetHalfSize);
+
+            *direction = glm::normalize(rootPosition - targetClosest);
+        }
+
+        return isColliding;
     }
 
     std::array<glm::vec3, 2> getBoundingBox() { return this->boundingBox; }

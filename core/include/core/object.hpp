@@ -4,6 +4,7 @@
 #include "core/transform.hpp"
 #include "core/uuid.hpp"
 
+class Collision;
 class Scene;
 
 class Object {
@@ -17,7 +18,7 @@ class Object {
     glm::mat4 view;
 
   public:
-    virtual void update(std::vector<Object *> collisions) {}
+    virtual void update(std::vector<Collision> collisions) {}
     virtual void draw(bool isColliding) = 0;
 
     Object(std::string name, std::string type)

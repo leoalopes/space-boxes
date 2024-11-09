@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/camera.hpp"
+#include "core/collision.hpp"
 #include "core/object.hpp"
 #include <GLFW/glfw3.h>
 #include <map>
@@ -22,7 +23,7 @@ class Scene {
     glm::mat4 matrix;
 
     /*bool detectionCollision(Object *root, Object *target);*/
-    std::map<std::string, std::vector<Object *>> detectCollisions();
+    std::map<std::string, std::vector<Collision>> detectCollisions();
 
   public:
     Scene(unsigned int width = DEFAULT_SCREEN_WIDTH,

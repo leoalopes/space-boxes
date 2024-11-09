@@ -1,4 +1,5 @@
 #include "core/scene.hpp"
+#include "core/collision.hpp"
 #include "core/collision_aware.hpp"
 #include "core/object.hpp"
 #include <map>
@@ -70,14 +71,12 @@ void Scene::setCamera(Camera *camera) {
 /*    return xAxis && yAxis && zAxis;*/
 /*}*/
 
-std::map<std::string, std::vector<Object *>> Scene::detectCollisions() {
-    std::map<std::string, std::vector<Object *>> collisionMap{};
+std::map<std::string, std::vector<Collision>> Scene::detectCollisions() {
+    std::map<std::string, std::vector<Collision>> collisionMap{};
     for (int i = 0; i < this->objects.size(); i++) {
         Object *root = this->objects.at(i);
         if (root != nullptr) {
             if (!root->isCollisionAware()) {
-                std::cout << root->getName()
-                          << " is not collision aware, skipping" << '\n';
                 continue;
             }
 
@@ -100,9 +99,6 @@ std::map<std::string, std::vector<Object *>> Scene::detectCollisions() {
                 Object *target = this->objects.at(j);
                 if (target != nullptr) {
                     if (!target->isCollisionAware()) {
-                        std::cout << target->getName()
-                                  << " is not collision aware, skipping"
-                                  << '\n';
                         continue;
                     }
 
@@ -122,23 +118,29 @@ std::map<std::string, std::vector<Object *>> Scene::detectCollisions() {
                         continue;
                     }
 
-                    bool isColliding =
-                        rootCollider->isColliding(targetCollider);
+                    glm::vec3 direction{0.0f};
+                    bool isColliding = rootCollider->checkCollision(
+                        targetCollider, &direction);
                     if (isColliding) {
+                        Collision rootCollision{target, direction};
+                        Collision targetCollision{root, -direction};
+
                         bool alreadyAddedRoot =
                             collisionMap.contains(root->getUUID());
                         if (alreadyAddedRoot) {
-                            collisionMap.at(root->getUUID()).push_back(target);
+                            collisionMap.at(root->getUUID())
+                                .push_back(rootCollision);
                         } else {
-                            collisionMap[root->getUUID()] = {target};
+                            collisionMap[root->getUUID()] = {rootCollision};
                         }
 
                         bool alreadyAddedTarget =
                             collisionMap.contains(target->getUUID());
                         if (alreadyAddedTarget) {
-                            collisionMap.at(target->getUUID()).push_back(root);
+                            collisionMap.at(target->getUUID())
+                                .push_back(targetCollision);
                         } else {
-                            collisionMap[target->getUUID()] = {root};
+                            collisionMap[target->getUUID()] = {targetCollision};
                         }
                     }
                 }

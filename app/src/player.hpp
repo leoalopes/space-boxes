@@ -13,24 +13,42 @@ class Player : public Cube, public CollisionAware {
   public:
     Player(CubeBuffer buffer, Shader shader, std::vector<Texture> textures)
         : Cube("player", "player", buffer, shader, textures), CollisionAware() {
-        std::cout << "Initializing player collider, this=" << this << std::endl;
         this->initializeCollider(this, glm::vec3(-0.5f, -0.5f, -0.5f),
                                  glm::vec3(1.0f, 1.0f, 1.0f));
-        std::cout << "Player collider initialized" << std::endl;
     }
 
     void draw(bool isColliding) override {
         Cube::draw(isColliding);
 
-        this->collider->debug(this->projection, this->view,
-                              isColliding ? 1 : 0);
+        /*this->collider->debug(this->projection, this->view,*/
+        /*                      isColliding ? 1 : 0);*/
     }
 
     bool isCollisionAware() override { return true; }
 
-    void update(std::vector<Object *> collisions) override {
+    void update(std::vector<Collision> collisions) override {
         if (this->scene == nullptr) {
             return;
+        }
+
+        if (collisions.size() > 0) {
+            std::cout << "Collisions: ";
+            for (int i = 0; i < collisions.size(); i++) {
+                if (i != 0) {
+                    std::cout << ", ";
+                }
+                std::cout << collisions.at(i).target->getType();
+            }
+            std::cout << '\n';
+
+            glm::vec3 location = this->transform.getLocation();
+            for (int i = 0; i < collisions.size(); i++) {
+                location.x += collisions.at(i).direction.x * 5.0f *
+                              this->scene->getDeltaTime();
+                location.z += collisions.at(i).direction.z * 5.0f *
+                              this->scene->getDeltaTime();
+            }
+            this->transform.setLocation(location);
         }
 
         GLFWwindow *window = this->scene->getWindow();
