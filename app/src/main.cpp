@@ -6,6 +6,7 @@
 #include "core/shader.hpp"
 #include "core/texture.hpp"
 #include "player.hpp"
+#include "wall.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <glm/glm.hpp>
@@ -84,29 +85,25 @@ int main() {
     floorTransform->setLocation(glm::vec3(0.0f, -1.0f, 0.0f));
     floorTransform->setScale(glm::vec3(50.0f, 0.5f, 50.0f));
 
-    CollisionAwareCube backWall("backWall", "wall", buffer, floorShader,
-                                {floorTexture});
+    Wall backWall("backWall", "wall", buffer, floorShader, {floorTexture});
     Transform *backWallTransform = backWall.getTransform();
     backWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     backWallTransform->setLocation(glm::vec3(0.0f, 1.25f, -25.25f));
     backWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
 
-    CollisionAwareCube leftWall("leftWall", "wall", buffer, floorShader,
-                                {floorTexture});
+    Wall leftWall("leftWall", "wall", buffer, floorShader, {floorTexture});
     Transform *leftWallTransform = leftWall.getTransform();
     leftWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
     leftWallTransform->setLocation(glm::vec3(25.25f, 1.25f, 0.0f));
     leftWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
 
-    CollisionAwareCube rightWall("rightWall", "wall", buffer, floorShader,
-                                 {floorTexture});
+    Wall rightWall("rightWall", "wall", buffer, floorShader, {floorTexture});
     Transform *rightWallTransform = rightWall.getTransform();
     rightWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
     rightWallTransform->setLocation(glm::vec3(-25.25f, 1.25f, 0.0f));
     rightWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
 
-    CollisionAwareCube frontWall("frontWall", "wall", buffer, floorShader,
-                                 {floorTexture});
+    Wall frontWall("frontWall", "wall", buffer, floorShader, {floorTexture});
     Transform *frontWallTransform = frontWall.getTransform();
     frontWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     frontWallTransform->setLocation(glm::vec3(0.0f, 1.25f, 25.25f));

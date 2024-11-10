@@ -20,8 +20,8 @@ class Player : public Cube, public CollisionAware {
     void draw(bool isColliding) override {
         Cube::draw(isColliding);
 
-        /*this->collider->debug(this->projection, this->view,*/
-        /*                      isColliding ? 1 : 0);*/
+        this->collider->debug(this->projection, this->view,
+                              isColliding ? 1 : 0);
     }
 
     bool isCollisionAware() override { return true; }
