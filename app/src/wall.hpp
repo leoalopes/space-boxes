@@ -11,6 +11,10 @@ class Wall : public CollisionAwareCube {
     using CollisionAwareCube::CollisionAwareCube;
 
     void draw(bool isColliding) override {
+        if (this->isDestroyed()) {
+            return;
+        }
+
         Scene *scene = this->getScene();
         if (scene == nullptr) {
             return;

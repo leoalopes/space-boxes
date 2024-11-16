@@ -1,23 +1,38 @@
 #pragma once
 
+#include "bullet.hpp"
 #include "core/collider.hpp"
-#include "core/collision_aware_cube.hpp"
+#include "core/collision_aware.hpp"
+#include "core/cube.hpp"
+#include "core/shader.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <memory>
 #include <vector>
+
+const int shootDelayFrames = 30;
 
 class Player : public Cube, public CollisionAware {
   private:
     constexpr static const glm::vec2 cameraOffset = glm::vec2(6.0f, 4.0f);
+    Shader bulletShader;
+    std::vector<std::unique_ptr<Bullet>> bullets;
+    double shootDelay = 0;
 
   public:
-    Player(CubeBuffer buffer, Shader shader, std::vector<Texture> textures)
-        : Cube("player", "player", buffer, shader, textures), CollisionAware() {
+    Player(CubeBuffer buffer, Shader shader, Shader bulletShader,
+           std::vector<Texture> textures)
+        : Cube("player", "player", buffer, shader, textures), CollisionAware(),
+          bulletShader(bulletShader) {
         this->initializeCollider(this, glm::vec3(-0.5f, -0.5f, -0.5f),
                                  glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
     void draw(bool isColliding) override {
+        if (this->isDestroyed()) {
+            return;
+        }
+
         Cube::draw(isColliding);
 
         this->collider->debug(this->projection, this->view,
@@ -27,6 +42,10 @@ class Player : public Cube, public CollisionAware {
     bool isCollisionAware() override { return true; }
 
     void update(std::vector<Collision> collisions) override {
+        if (this->isDestroyed()) {
+            return;
+        }
+
         if (this->scene == nullptr) {
             return;
         }
@@ -56,8 +75,37 @@ class Player : public Cube, public CollisionAware {
             return;
         }
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-            std::cout << "Shoot!" << std::endl;
+        int bulletIndex = 0;
+        while (bulletIndex < this->bullets.size()) {
+            if (this->bullets.at(bulletIndex)->isDestroyed() &&
+                this->bullets.at(bulletIndex)->getScene() == nullptr) {
+                this->bullets.at(bulletIndex).reset();
+                this->bullets.erase(this->bullets.begin() + bulletIndex);
+            } else {
+                bulletIndex++;
+            }
+        }
+
+        if (this->shootDelay > 0) {
+            this->shootDelay -= this->scene->getDeltaTime();
+        }
+
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
+            this->shootDelay <= 0) {
+            std::unique_ptr<Bullet> bullet = std::make_unique<Bullet>(
+                this->buffer, this->bulletShader, this->textures);
+
+            const glm::vec3 forwardVector = this->transform.getForwardVector();
+            const glm::vec3 location = this->transform.getLocation();
+            bullet->getTransform()->setLocation(location +
+                                                forwardVector * 0.5f);
+            bullet->getTransform()->setRotation(this->transform.getRotation());
+            bullet->getTransform()->setScale({0.15f, 0.15f, 0.75f});
+
+            this->scene->addObject(bullet.get());
+
+            this->bullets.push_back(std::move(bullet));
+            this->shootDelay = shootDelayFrames * this->scene->getDeltaTime();
         }
 
         glm::vec2 movement(0);

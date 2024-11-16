@@ -31,6 +31,7 @@ class Scene {
 
     std::vector<Object *> getObjects() const { return this->objects; }
     void addObject(Object *object);
+    void removeObject(Object *object);
 
     Camera *getCamera() const { return this->camera; }
     void setCamera(Camera *camera);

@@ -8,12 +8,16 @@ class CollisionAwareCube : public Cube, public CollisionAware {
                        Shader shader, std::vector<Texture> textures)
         : Cube(name, type, buffer, shader, textures), CollisionAware() {
         this->initializeCollider(this, glm::vec3(-0.5f, -0.5f, -0.5f),
-                                 glm::vec3(1.0f, 1.0f, 1.0f), {"player"});
+                                 glm::vec3(1.0f, 1.0f, 1.0f),
+                                 {"player", "bullet"});
     }
 
     void draw(bool isColliding) override {
-        Cube::draw(isColliding);
+        if (this->isDestroyed()) {
+            return;
+        }
 
+        Cube::draw(isColliding);
         this->collider->debug(this->projection, this->view,
                               isColliding ? 1 : 0);
     }

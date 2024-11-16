@@ -14,6 +14,15 @@ void Scene::addObject(Object *object) {
     object->setScene(this);
 }
 
+void Scene::removeObject(Object *object) {
+    for (int i = 0; i < this->objects.size(); i++) {
+        if (this->objects.at(i)->getUUID() == object->getUUID()) {
+            this->objects.erase(this->objects.begin() + i);
+            break;
+        }
+    }
+}
+
 void Scene::setCamera(Camera *camera) {
     this->camera = camera;
     this->matrix = glm::perspective(glm::radians(this->camera->getFov()),
@@ -154,6 +163,15 @@ std::map<std::string, std::vector<Collision>> Scene::detectCollisions() {
 void Scene::draw() {
     if (this->camera == nullptr) {
         return;
+    }
+
+    for (Object *object : this->objects) {
+        if (object == nullptr || object->isDestroyed()) {
+            this->removeObject(object);
+            if (object != nullptr) {
+                object->setScene(nullptr);
+            }
+        }
     }
 
     auto collisionMap = this->detectCollisions();

@@ -16,6 +16,10 @@ Cube::Cube(std::string name, std::string type, CubeBuffer buffer, Shader shader,
 }
 
 void Cube::draw(bool isColliding) {
+    if (this->isDestroyed()) {
+        return;
+    }
+
     for (int tex = 0; tex < this->textures.size(); tex++) {
         glActiveTexture(GL_TEXTURE0 + tex);
         this->textures.at(tex).use();

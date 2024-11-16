@@ -49,7 +49,7 @@ class Collider {
         this->debugShader.setMatrix("view", glm::value_ptr(view));
         this->debugShader.setInt("isColliding", isColliding);
 
-        this->buffer->draw();
+        /*this->buffer->draw();*/
     }
 
     Object *getParent() { return this->parent; }
@@ -66,6 +66,9 @@ class Collider {
         if (!this->collideWith.empty() &&
             std::count(this->collideWith.begin(), this->collideWith.end(),
                        targetCollider->getParent()->getType()) == 0) {
+            /*std::cout << "Not checking collision between "*/
+            /*          << this->parent->getType() << " and "*/
+            /*          << targetCollider->getParent()->getType() << '\n';*/
             return false;
         }
 
@@ -73,6 +76,9 @@ class Collider {
             std::count(targetCollider->collideWith.begin(),
                        targetCollider->collideWith.end(),
                        this->getParent()->getType()) == 0) {
+            /*std::cout << "Not checking collision between "*/
+            /*          << this->parent->getType() << " and "*/
+            /*          << targetCollider->getParent()->getType() << '\n';*/
             return false;
         }
 

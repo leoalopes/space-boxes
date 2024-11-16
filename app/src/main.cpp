@@ -73,9 +73,11 @@ int main() {
     GLFWwindow *window = initWindow();
     CubeBuffer buffer;
 
+    Shader bulletShader("assets/shaders/cube.vert",
+                        "assets/shaders/bullet.frag");
     Shader cubeShader("assets/shaders/cube.vert", "assets/shaders/cube.frag");
     Texture cubeTexture("assets/textures/floor.jpg", GL_RGB);
-    Player player(buffer, cubeShader, {cubeTexture});
+    Player player(buffer, cubeShader, bulletShader, {cubeTexture});
 
     Shader floorShader("assets/shaders/floor.vert",
                        "assets/shaders/floor.frag");
