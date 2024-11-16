@@ -5,6 +5,7 @@
 #include "core/scene.hpp"
 #include "core/shader.hpp"
 #include "core/texture.hpp"
+#include "enemy.hpp"
 #include "player.hpp"
 #include "wall.hpp"
 #include <GLFW/glfw3.h>
@@ -12,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 const unsigned int SCR_WIDTH = 1920;
@@ -23,6 +25,8 @@ float mouseX = 0;
 float mouseY = 0;
 float newMouseX = 0;
 float newMouseY = 0;
+
+double fpsLimit = 1.0 / (60);
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -48,8 +52,9 @@ GLFWwindow *initWindow() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH / 2, SCR_HEIGHT / 2,
-                                          "SpaceBoxes", NULL, NULL);
+    GLFWwindow *window =
+        glfwCreateWindow(SCR_WIDTH / 2, SCR_HEIGHT / 2, "SpaceBoxes",
+                         glfwGetPrimaryMonitor(), NULL);
     if (window == nullptr) {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
@@ -75,9 +80,10 @@ int main() {
 
     Shader bulletShader("assets/shaders/cube.vert",
                         "assets/shaders/bullet.frag");
-    Shader cubeShader("assets/shaders/cube.vert", "assets/shaders/cube.frag");
-    Texture cubeTexture("assets/textures/floor.jpg", GL_RGB);
-    Player player(buffer, cubeShader, bulletShader, {cubeTexture});
+    Shader playerShader("assets/shaders/cube.vert",
+                        "assets/shaders/player.frag");
+    Texture playerTexture("assets/textures/floor.jpg", GL_RGB);
+    Player player(buffer, playerShader, bulletShader, {playerTexture});
 
     Shader floorShader("assets/shaders/floor.vert",
                        "assets/shaders/floor.frag");
@@ -90,34 +96,37 @@ int main() {
     Wall backWall("backWall", "wall", buffer, floorShader, {floorTexture});
     Transform *backWallTransform = backWall.getTransform();
     backWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
-    backWallTransform->setLocation(glm::vec3(0.0f, 1.25f, -25.25f));
-    backWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+    backWallTransform->setLocation(glm::vec3(0.0f, 3.75f, -25.25f));
+    backWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
     Wall leftWall("leftWall", "wall", buffer, floorShader, {floorTexture});
     Transform *leftWallTransform = leftWall.getTransform();
     leftWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
-    leftWallTransform->setLocation(glm::vec3(25.25f, 1.25f, 0.0f));
-    leftWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+    leftWallTransform->setLocation(glm::vec3(25.25f, 3.75f, 0.0f));
+    leftWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
     Wall rightWall("rightWall", "wall", buffer, floorShader, {floorTexture});
     Transform *rightWallTransform = rightWall.getTransform();
     rightWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
-    rightWallTransform->setLocation(glm::vec3(-25.25f, 1.25f, 0.0f));
-    rightWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+    rightWallTransform->setLocation(glm::vec3(-25.25f, 3.75f, 0.0f));
+    rightWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
     Wall frontWall("frontWall", "wall", buffer, floorShader, {floorTexture});
     Transform *frontWallTransform = frontWall.getTransform();
     frontWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
-    frontWallTransform->setLocation(glm::vec3(0.0f, 1.25f, 25.25f));
-    frontWallTransform->setScale(glm::vec3(50.0f, 0.5f, 5.0f));
+    frontWallTransform->setLocation(glm::vec3(0.0f, 3.75f, 25.25f));
+    frontWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
+    std::array<glm::vec3, 2> bounds = {glm::vec3{-24.0f, 0.0f, -24.0f},
+                                       glm::vec3{24.0f, 0.0f, 24.0f}};
+    Shader enemyShader("assets/shaders/cube.vert", "assets/shaders/enemy.frag");
     Texture enemyTexture("assets/textures/enemy.jpg", GL_RGB);
-    CollisionAwareCube enemy("enemy", "enemy", buffer, cubeShader,
-                             {enemyTexture});
-    Transform *enemyTransform = enemy.getTransform();
-    enemyTransform->setLocation(glm::vec3(4.0f, 0.0f, -6.0f));
+    std::vector<std::shared_ptr<Enemy>> enemies{};
+    float enemySpawnDelay = 0;
+    const int enemySpawnDelayFrames = 60;
 
     Camera camera;
+    camera.setLocation(camera.getLocation() + glm::vec3{0.0f, 2.0f, 4.0f});
 
     Scene scene;
     scene.addObject(&player);
@@ -126,20 +135,26 @@ int main() {
     scene.addObject(&leftWall);
     scene.addObject(&rightWall);
     scene.addObject(&frontWall);
-    scene.addObject(&enemy);
     scene.setCamera(&camera);
     scene.setWindow(window);
 
     double previousFrame = glfwGetTime();
+    double previousRender = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
         double currentFrame = glfwGetTime();
         double deltaTime = currentFrame - previousFrame;
         previousFrame = currentFrame;
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if ((currentFrame - previousRender) < fpsLimit) {
+            continue;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ||
+            scene.isStopped()) {
             glfwSetWindowShouldClose(window, true);
         }
 
+        glClearColor(0.502, 0.502, 0.502, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float mouseDeltaX = mouseX - newMouseX;
@@ -147,7 +162,17 @@ int main() {
         mouseX = newMouseX;
         mouseY = newMouseY;
 
-        enemy.getCollider()->updateBoundingBox();
+        if (enemySpawnDelay <= 0) {
+            auto enemy =
+                std::make_shared<Enemy>(bounds, &player, buffer, enemyShader,
+                                        std::vector<Texture>{enemyTexture});
+            enemies.push_back(enemy);
+            scene.addObject(enemy.get());
+            enemySpawnDelay = 120 * deltaTime;
+        } else {
+            enemySpawnDelay -= deltaTime;
+        }
+
         player.getCollider()->updateBoundingBox();
         frontWall.getCollider()->updateBoundingBox();
         backWall.getCollider()->updateBoundingBox();
@@ -157,6 +182,17 @@ int main() {
         scene.setMouseDelta(glm::vec2(mouseDeltaX, mouseDeltaY));
         scene.setDeltaTime(deltaTime);
         scene.draw();
+
+        int enemyIndex = 0;
+        while (enemyIndex < enemies.size()) {
+            if (enemies.at(enemyIndex)->isDestroyed() &&
+                enemies.at(enemyIndex)->getScene() == nullptr) {
+                enemies.at(enemyIndex).reset();
+                enemies.erase(enemies.begin() + enemyIndex);
+            } else {
+                enemyIndex++;
+            }
+        }
 
         glfwPollEvents();
         glfwSwapBuffers(window);

@@ -6,11 +6,10 @@
 #include "core/cube.hpp"
 #include "core/shader.hpp"
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <memory>
 #include <vector>
 
-const int shootDelayFrames = 30;
+const int shootDelayFrames = 120;
 
 class Player : public Cube, public CollisionAware {
   private:
@@ -51,21 +50,17 @@ class Player : public Cube, public CollisionAware {
         }
 
         if (collisions.size() > 0) {
-            std::cout << "Collisions: ";
-            for (int i = 0; i < collisions.size(); i++) {
-                if (i != 0) {
-                    std::cout << ", ";
-                }
-                std::cout << collisions.at(i).target->getType();
-            }
-            std::cout << '\n';
-
             glm::vec3 location = this->transform.getLocation();
             for (int i = 0; i < collisions.size(); i++) {
-                location.x += collisions.at(i).direction.x * 5.0f *
-                              this->scene->getDeltaTime();
-                location.z += collisions.at(i).direction.z * 5.0f *
-                              this->scene->getDeltaTime();
+                if (collisions.at(i).target->getType() == "enemy") {
+                    this->scene->stop();
+                }
+                if (collisions.at(i).target->getType() == "wall") {
+                    location.x += collisions.at(i).direction.x * 5.0f *
+                                  this->scene->getDeltaTime();
+                    location.z += collisions.at(i).direction.z * 5.0f *
+                                  this->scene->getDeltaTime();
+                }
             }
             this->transform.setLocation(location);
         }
@@ -158,9 +153,5 @@ class Player : public Cube, public CollisionAware {
 
         camera->setLocation(newCameraLocation);
         camera->setForwardVector(location - newCameraLocation);
-
-        std::array<glm::vec3, 2> bb = this->getCollider()->getBoundingBox();
-        glm::vec3 beginning = bb[0];
-        glm::vec3 end = bb[1];
     }
 };

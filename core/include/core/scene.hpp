@@ -21,6 +21,7 @@ class Scene {
     float deltaTime;
     glm::vec2 mouseDelta;
     glm::mat4 matrix;
+    bool shouldStop;
 
     /*bool detectionCollision(Object *root, Object *target);*/
     std::map<std::string, std::vector<Collision>> detectCollisions();
@@ -46,4 +47,7 @@ class Scene {
     void setMouseDelta(glm::vec2 mouseDelta) { this->mouseDelta = mouseDelta; }
 
     void draw();
+
+    void stop() { this->shouldStop = true; }
+    bool isStopped() { return this->shouldStop; }
 };

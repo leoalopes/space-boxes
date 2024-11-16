@@ -6,8 +6,8 @@
 #include <vector>
 
 Scene::Scene(unsigned int width, unsigned int height)
-    : matrix(1.0f), aspectRatio((float)width / (float)height),
-      mouseDelta(0.0f) {}
+    : matrix(1.0f), aspectRatio((float)width / (float)height), mouseDelta(0.0f),
+      shouldStop(false) {}
 
 void Scene::addObject(Object *object) {
     this->objects.push_back(object);
