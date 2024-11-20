@@ -49,7 +49,8 @@ class Collider {
         this->debugShader.setMatrix("view", glm::value_ptr(view));
         this->debugShader.setInt("isColliding", isColliding);
 
-        /*this->buffer->draw();*/
+        // Uncomment this line to enable collider debugging
+        // this->buffer->draw();
     }
 
     Object *getParent() { return this->parent; }
@@ -66,9 +67,6 @@ class Collider {
         if (!this->collideWith.empty() &&
             std::count(this->collideWith.begin(), this->collideWith.end(),
                        targetCollider->getParent()->getType()) == 0) {
-            /*std::cout << "Not checking collision between "*/
-            /*          << this->parent->getType() << " and "*/
-            /*          << targetCollider->getParent()->getType() << '\n';*/
             return false;
         }
 
@@ -76,25 +74,11 @@ class Collider {
             std::count(targetCollider->collideWith.begin(),
                        targetCollider->collideWith.end(),
                        this->getParent()->getType()) == 0) {
-            /*std::cout << "Not checking collision between "*/
-            /*          << this->parent->getType() << " and "*/
-            /*          << targetCollider->getParent()->getType() << '\n';*/
             return false;
         }
 
         std::array<glm::vec3, 2> rootBB = this->getBoundingBox();
         std::array<glm::vec3, 2> targetBB = targetCollider->getBoundingBox();
-
-        /*std::cout << "--- Comparing ---" << '\n';*/
-        /*std::cout << "x: " << rootBB[0].x << " -> " << rootBB[1].x*/
-        /*          << " to x: " << targetBB[0].x << " -> " << targetBB[1].x*/
-        /*          << '\n';*/
-        /*std::cout << "y: " << rootBB[0].y << " -> " << rootBB[1].y*/
-        /*          << " to y: " << targetBB[0].y << " -> " << targetBB[1].y*/
-        /*          << '\n';*/
-        /*std::cout << "z: " << rootBB[0].z << " -> " << rootBB[1].z*/
-        /*          << " to z: " << targetBB[0].z << " -> " << targetBB[1].z*/
-        /*          << '\n';*/
 
         bool xAxis =
             rootBB[1].x >= targetBB[0].x && targetBB[1].x >= rootBB[0].x;

@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-const int shootDelayFrames = 120;
+const int shootDelayFrames = 90;
 
 class Player : public Cube, public CollisionAware {
   private:

@@ -52,9 +52,9 @@ GLFWwindow *initWindow() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window =
-        glfwCreateWindow(SCR_WIDTH / 2, SCR_HEIGHT / 2, "SpaceBoxes",
-                         glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SpaceBoxes",
+                                          glfwGetPrimaryMonitor(), NULL);
+
     if (window == nullptr) {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
@@ -82,36 +82,37 @@ int main() {
                         "assets/shaders/bullet.frag");
     Shader playerShader("assets/shaders/cube.vert",
                         "assets/shaders/player.frag");
-    Texture playerTexture("assets/textures/floor.jpg", GL_RGB);
-    Player player(buffer, playerShader, bulletShader, {playerTexture});
+    Texture boxTexture("assets/textures/box.png", GL_RGBA);
+    Player player(buffer, playerShader, bulletShader, {boxTexture});
 
     Shader floorShader("assets/shaders/floor.vert",
                        "assets/shaders/floor.frag");
-    Texture floorTexture("assets/textures/floor.png", GL_RGB);
+    Texture floorTexture("assets/textures/floor.png", GL_RGBA);
     Cube floor("floor", "floor", buffer, floorShader, {floorTexture});
     Transform *floorTransform = floor.getTransform();
     floorTransform->setLocation(glm::vec3(0.0f, -1.0f, 0.0f));
     floorTransform->setScale(glm::vec3(50.0f, 0.5f, 50.0f));
 
-    Wall backWall("backWall", "wall", buffer, floorShader, {floorTexture});
+    Shader wallShader("assets/shaders/floor.vert", "assets/shaders/wall.frag");
+    Wall backWall("backWall", "wall", buffer, wallShader, {floorTexture});
     Transform *backWallTransform = backWall.getTransform();
     backWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     backWallTransform->setLocation(glm::vec3(0.0f, 3.75f, -25.25f));
     backWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
-    Wall leftWall("leftWall", "wall", buffer, floorShader, {floorTexture});
+    Wall leftWall("leftWall", "wall", buffer, wallShader, {floorTexture});
     Transform *leftWallTransform = leftWall.getTransform();
     leftWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
     leftWallTransform->setLocation(glm::vec3(25.25f, 3.75f, 0.0f));
     leftWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
-    Wall rightWall("rightWall", "wall", buffer, floorShader, {floorTexture});
+    Wall rightWall("rightWall", "wall", buffer, wallShader, {floorTexture});
     Transform *rightWallTransform = rightWall.getTransform();
     rightWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 90.0f));
     rightWallTransform->setLocation(glm::vec3(-25.25f, 3.75f, 0.0f));
     rightWallTransform->setScale(glm::vec3(50.0f, 0.5f, 10.0f));
 
-    Wall frontWall("frontWall", "wall", buffer, floorShader, {floorTexture});
+    Wall frontWall("frontWall", "wall", buffer, wallShader, {floorTexture});
     Transform *frontWallTransform = frontWall.getTransform();
     frontWallTransform->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     frontWallTransform->setLocation(glm::vec3(0.0f, 3.75f, 25.25f));
@@ -120,7 +121,6 @@ int main() {
     std::array<glm::vec3, 2> bounds = {glm::vec3{-24.0f, 0.0f, -24.0f},
                                        glm::vec3{24.0f, 0.0f, 24.0f}};
     Shader enemyShader("assets/shaders/cube.vert", "assets/shaders/enemy.frag");
-    Texture enemyTexture("assets/textures/enemy.jpg", GL_RGB);
     std::vector<std::shared_ptr<Enemy>> enemies{};
     float enemySpawnDelay = 0;
     const int enemySpawnDelayFrames = 60;
@@ -154,7 +154,7 @@ int main() {
             glfwSetWindowShouldClose(window, true);
         }
 
-        glClearColor(0.502, 0.502, 0.502, 1.0f);
+        glClearColor(0.231, 0.231, 0.231, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float mouseDeltaX = mouseX - newMouseX;
@@ -165,7 +165,7 @@ int main() {
         if (enemySpawnDelay <= 0) {
             auto enemy =
                 std::make_shared<Enemy>(bounds, &player, buffer, enemyShader,
-                                        std::vector<Texture>{enemyTexture});
+                                        std::vector<Texture>{boxTexture});
             enemies.push_back(enemy);
             scene.addObject(enemy.get());
             enemySpawnDelay = 120 * deltaTime;

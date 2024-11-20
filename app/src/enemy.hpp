@@ -24,8 +24,6 @@ class Enemy : public Cube, public CollisionAware {
                         0.0f,
                         this->randomizer.getRandomBetween(this->bounds[0].z,
                                                           this->bounds[1].z)};
-            /*std::cout << "Spawn: " << location.x << " " << location.z <<
-             * '\n';*/
         } while (glm::length(location - playerLocation) < 15.0f);
         this->transform.setLocation(location);
         this->collider->updateBoundingBox();
@@ -41,6 +39,13 @@ class Enemy : public Cube, public CollisionAware {
                                  glm::vec3(1.0f, 1.0f, 1.0f),
                                  {"bullet", "player"});
         this->setSpawn();
+    }
+
+    void draw(bool isColliding) override {
+        Cube::draw(isColliding);
+
+        this->collider->debug(this->projection, this->view,
+                              isColliding ? 1 : 0);
     }
 
     void update(std::vector<Collision> collisions) override {
